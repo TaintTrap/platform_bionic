@@ -501,4 +501,28 @@
 #define  __BIONIC__   1
 #include <android/api-level.h>
 
+#if defined(_FORTIFY_SOURCE) && _FORTIFY_SOURCE > 0 && defined(__OPTIMIZE__) && __OPTIMIZE__ > 0 && !defined(__clang__)
+#define __BIONIC_FORTIFY_INLINE \
+    extern inline \
+    __attribute__ ((always_inline)) \
+    __attribute__ ((gnu_inline)) \
+    __attribute__ ((artificial))
+#define __BIONIC_FORTIFY_UNKNOWN_SIZE ((size_t) -1)
+#endif
+
+/* Android-added: for FreeBSD's libm. */
+#define __weak_reference(sym,alias) \
+    __asm__(".weak " #alias); \
+    __asm__(".equ "  #alias ", " #sym)
+#define __strong_reference(sym,aliassym) \
+    extern __typeof (sym) aliassym __attribute__ ((__alias__ (#sym)))
+
+/* Indicates to client code that <signal.h> now defines 'struct sigcontext'
+ * properly. See comments in <signal.h> */
+#define __BIONIC_HAVE_STRUCT_SIGCONTEXT  1
+
+/* Indicates to client code that <signal.h> now defines 'ucontext_t' */
+/* NOTE: That does not mean that <ucontext.h> is available! */
+#define __BIONIC_HAVE_UCONTEXT_T  1
+
 #endif /* !_SYS_CDEFS_H_ */
