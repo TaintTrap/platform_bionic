@@ -167,4 +167,7 @@ typedef struct ucontext {
 
 __END_DECLS
 
+/* Set user context from information of variable pointed to by UCP. */
+extern int setcontext (const ucontext_t *ucp);
+
 #endif /* _ARCH_ARM_SYS_UCONTEXT_H_ */
