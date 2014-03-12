@@ -18,6 +18,5 @@ ENTRY(setcontext)
   /* Restore general purpose regs r0 to r15 from ucp */
 	add   lr, r4, #MCONTEXT_ARM_R0
 	ldmia lr, {r0-r15}          /* appears to work - deprecated? */
-
-  /* TODO: do we need to restore CPSR here? glibc doesn't appear to do it */
+  /* No need to restore CPSR - the caller will set PC LSB 0/1 depending on mode */
 END(setcontext)
