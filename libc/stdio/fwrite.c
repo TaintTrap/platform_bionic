@@ -52,6 +52,39 @@ fwrite(const void *buf, size_t size, size_t count, FILE *fp)
 	uio.uio_iov = &iov;
 	uio.uio_iovcnt = 1;
 
+#ifdef WITH_TAINT_TRACKING
+  int fd = fp->_file;
+  char path[1024];
+  char result[1024];
+
+  sprintf(path, "/proc/self/fd/%d", fd);
+  memset(result, 0, sizeof(result));
+  readlink(path, result, sizeof(result)-1);
+
+  fprintf(stderr, "%s  : write(%d) %s buf: %p n: %4d offset: %6ld\n", __func__, fd, result, buf, n, fp->_offset);
+
+  int xbuf;
+  int xtag = TAINT_CLEAR;
+  int xret = fgetxattr(fd, TAINT_XATTR_NAME, &xbuf, sizeof(xbuf));
+
+  if (xret > 0) {
+      xtag = xbuf;
+      fprintf(stdout, "%s  : write(%d) taint tag: 0x%x\n", __func__, fd, xtag);
+  } else {
+      if (errno == ENOATTR) {
+          // fprintf(stdout, "fgetxattr(%s): no taint tag\n", result);
+      } else if (errno == ERANGE) {
+          fprintf(stderr, "TaintLog: fgetxattr(%s) contents to large\n", result);
+      } else if (errno == ENOTSUP) {
+          /* XATTRs are not supported. No need to spam the logs */
+      } else if (errno == EPERM) {
+          /* Strange interaction with /dev/log/main. Suppress the log */
+      } else {
+          fprintf(stderr, "TaintLog: fgetxattr(%s): unknown error code %d\n", result, errno);
+      }
+  }
+#endif
+
 	/*
 	 * The usual case is success (__sfvwrite returns 0);
 	 * skip the divide if this happens, since divides are

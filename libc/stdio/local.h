@@ -35,6 +35,17 @@
 #include "wcio.h"
 #include "fileext.h"
 
+#ifdef WITH_TAINT_TRACKING
+#include <anemu.h>
+#include <sys/xattr.h>          /* fsetxattr, fgetxattr */
+#include <unistd.h>             /* readlink */
+#include <errno.h>              /* errno */
+
+#define TAINT_CLEAR 0x0
+#define TAINT_XATTR_NAME "user.taint"
+#define ENOATTR ENODATA
+#endif
+
 #ifndef DEFFILEMODE
 #define DEFFILEMODE  (S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH)
 #endif

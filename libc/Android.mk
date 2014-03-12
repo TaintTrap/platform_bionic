@@ -89,7 +89,6 @@ libc_common_src_files := \
 	stdio/findfp.c \
 	stdio/flags.c \
 	stdio/flockfile.c \
-	stdio/fopen.c \
 	stdio/fprintf.c \
 	stdio/fpurge.c \
 	stdio/fputc.c \
@@ -103,7 +102,6 @@ libc_common_src_files := \
 	stdio/funopen.c \
 	stdio/fvwrite.c \
 	stdio/fwalk.c \
-	stdio/fwrite.c \
 	stdio/getc.c \
 	stdio/getchar.c \
 	stdio/gets.c \
@@ -125,7 +123,6 @@ libc_common_src_files := \
 	stdio/snprintf.c\
 	stdio/sprintf.c \
 	stdio/sscanf.c \
-	stdio/stdio.c \
 	stdio/tempnam.c \
 	stdio/tmpfile.c \
 	stdio/tmpnam.c \
@@ -341,6 +338,15 @@ libc_static_common_src_files := \
         unistd/sysconf.c \
         bionic/__errno.c \
 
+# As mentioned above, some files must be compiled
+# with different C flags for static/dynamic lib.
+# We only only want WITH_TAINT_TRACKING for libc.so
+ifeq ($(WITH_TAINT_TRACKING),true)
+  libc_static_common_src_files += stdio/stdio.c \
+                                  stdio/fopen.c \
+                                  stdio/fwrite.c
+endif
+
 # Architecture specific source files go here
 # =========================================================
 ifeq ($(TARGET_ARCH),arm)
@@ -513,6 +519,7 @@ endif
 # Define some common includes
 # ========================================================
 libc_common_c_includes := \
+		dalvik/vm/anemu       \
 		$(LOCAL_PATH)/stdlib  \
 		$(LOCAL_PATH)/string  \
 		$(LOCAL_PATH)/stdio
@@ -665,6 +672,10 @@ include $(CLEAR_VARS)
 
 LOCAL_CFLAGS := $(libc_common_cflags) -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 
+ifeq ($(WITH_TAINT_TRACKING),true)
+    LOCAL_CFLAGS += -DWITH_TAINT_TRACKING
+endif
+
 ifeq ($(TARGET_ARCH),arm)
 # TODO: At some point, we need to remove this custom linker script.
 LOCAL_LDFLAGS := -Wl,-T,$(BUILD_SYSTEM)/armelf.xsc
@@ -693,6 +704,8 @@ LOCAL_MODULE:= libc
 LOCAL_SHARED_LIBRARIES := libdl
 LOCAL_WHOLE_STATIC_LIBRARIES := libc_common
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
+LOCAL_WHOLE_STATIC_LIBRARIES += libanemu
+LOCAL_STATIC_LIBRARIES := libcutils libgccdemangle
 
 include $(BUILD_SHARED_LIBRARY)
 

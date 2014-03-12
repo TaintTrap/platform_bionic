@@ -54,6 +54,28 @@ fopen(const char *file, const char *mode)
 		fp->_flags = 0;			/* release */
 		return (NULL);
 	}
+
+#ifdef WITH_TAINT_TRACKING
+  int xtag = TAINT_CLEAR;
+  int xret = fgetxattr(f, TAINT_XATTR_NAME, &xtag, sizeof(xtag));
+
+  if (xret > 0) {
+      fprintf(stdout, "%s   :  open(%d) taint tag: 0x%x\n", __func__, f, xtag);
+  } else {
+      if (errno == ENOATTR) {
+          // fprintf(stdout, "fgetxattr(%s): no taint tag\n", file);
+      } else if (errno == ERANGE) {
+          fprintf(stderr, "TaintLog: fgetxattr(%s) contents to large\n", file);
+      } else if (errno == ENOTSUP) {
+          /* XATTRs are not supported. No need to spam the logs */
+      } else if (errno == EPERM) {
+          /* Strange interaction with /dev/log/main. Suppress the log */
+      } else {
+          fprintf(stderr, "TaintLog: fgetxattr(%s): unknown error code %d\n", file, errno);
+      }
+  }
+#endif
+
 	fp->_file = f;
 	fp->_flags = flags;
 	fp->_cookie = fp;
@@ -72,5 +94,9 @@ fopen(const char *file, const char *mode)
 	 */
 	if (oflags & O_APPEND)
 		(void) __sseek((void *)fp, (fpos_t)0, SEEK_END);
+
+#ifdef WITH_TAINT_TRACKING
+  fprintf(stderr, "%s   :  open(%d) %s mode: %s offset: %4ld\n", __func__, f, file, mode, fp->_offset);
+#endif
 	return (fp);
 }
