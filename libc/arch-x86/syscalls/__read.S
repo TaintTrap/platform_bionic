@@ -2,11 +2,11 @@
 #include <sys/linux-syscalls.h>
 
     .text
-    .type read, @function
-    .globl read
+    .type __read, @function
+    .globl __read
     .align 4
 
-read:
+__read:
     pushl   %ebx
     pushl   %ecx
     pushl   %edx

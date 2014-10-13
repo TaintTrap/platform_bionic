@@ -87,8 +87,8 @@ int     sigaltstack(const stack_t*, stack_t*) 186
 int     acct(const char*  filepath)  51
 
 # file descriptors
-ssize_t     read (int, void*, size_t)        3
-ssize_t     write (int, const void*, size_t)       4
+ssize_t     __read:read (int, void*, size_t)        3
+ssize_t     __write:write (int, const void*, size_t)       4
 ssize_t     pread64 (int, void *, size_t, off64_t) 180
 ssize_t     pwrite64 (int, void *, size_t, off64_t) 181
 int         __open:open (const char*, int, mode_t)  5

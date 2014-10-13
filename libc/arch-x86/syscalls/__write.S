@@ -2,11 +2,11 @@
 #include <sys/linux-syscalls.h>
 
     .text
-    .type write, @function
-    .globl write
+    .type __write, @function
+    .globl __write
     .align 4
 
-write:
+__write:
     pushl   %ebx
     pushl   %ecx
     pushl   %edx
