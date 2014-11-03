@@ -125,6 +125,9 @@ _pthread_internal_free( pthread_internal_t*  thread )
 {
     if (thread && thread->intern) {
         thread->intern = 0;  /* just in case */
+#ifdef WITH_TAINT_TRACKING
+        emu_hook_pthread_internal_free((void *)thread);
+#endif
         free (thread);
     }
 }
@@ -213,6 +216,10 @@ void __thread_entry(int (*func)(void*), void *arg, void **tls)
     thrInfo = (pthread_internal_t *) tls[TLS_SLOT_THREAD_ID];
 
     __init_tls( tls, thrInfo );
+
+#ifdef WITH_TAINT_TRACKING
+    emu_hook_thread_entry((void *)thrInfo);
+#endif
 
     pthread_exit( (void*)func(arg) );
 }
@@ -618,6 +625,11 @@ void pthread_exit(void * retval)
     sigfillset(&mask);
     sigdelset(&mask, SIGSEGV);
     (void)sigprocmask(SIG_SETMASK, &mask, (sigset_t *)NULL);
+
+#ifdef WITH_TAINT_TRACKING
+    // _pthread_internal_free(thread) should have been called earlier
+    assert(thread->intern == 0);
+#endif
 
     // destroy the thread stack
     if (user_stack)

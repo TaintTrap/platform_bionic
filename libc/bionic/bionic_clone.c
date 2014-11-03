@@ -50,7 +50,13 @@ extern void _exit_thread(int  retCode);
 extern void
 __bionic_clone_entry( int (*fn)(void *), void *arg )
 {
+#ifdef WITH_TAINT_TRACKING
+    emu_hook_bionic_clone_entry();
+#endif
     int  ret = (*fn)(arg);
+#ifdef WITH_TAINT_TRACKING
+    emu_hook_exit_thread(ret);
+#endif
     _exit_thread(ret);
 }
 

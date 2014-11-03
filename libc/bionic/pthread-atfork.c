@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <pthread.h>
 #include <sys/queue.h>
+#include <anemu.h>
 
 static pthread_mutex_t handler_mutex = PTHREAD_RECURSIVE_MUTEX_INITIALIZER;
 
@@ -88,6 +89,10 @@ void __bionic_atfork_run_child()
     pthread_mutexattr_init(&attr);
     pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(&handler_mutex, &attr);
+
+#ifdef WITH_TAINT_TRACKING
+    emu_hook_bionic_atfork_run_child((void*)pthread_self());
+#endif
 }
 
 void __bionic_atfork_run_parent()
