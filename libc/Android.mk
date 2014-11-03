@@ -616,6 +616,7 @@ include $(CLEAR_VARS)
 LOCAL_SRC_FILES := $(libc_common_src_files)
 LOCAL_CFLAGS := $(libc_common_cflags)
 ifeq ($(TARGET_ARCH),arm)
+LOCAL_ARM_MODE := arm
 LOCAL_CFLAGS += -DCRT_LEGACY_WORKAROUND
 endif
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
@@ -652,6 +653,7 @@ LOCAL_SYSTEM_SHARED_LIBRARIES :=
 LOCAL_WHOLE_STATIC_LIBRARIES += libanemu
 LOCAL_STATIC_LIBRARIES := libcutils libgccdemangle
 
+LOCAL_ARM_MODE := arm
 include $(BUILD_STATIC_LIBRARY)
 
 
@@ -674,6 +676,7 @@ LOCAL_MODULE := libc
 LOCAL_WHOLE_STATIC_LIBRARIES := libc_common
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
 
+LOCAL_ARM_MODE := arm
 include $(BUILD_STATIC_LIBRARY)
 
 
@@ -693,6 +696,7 @@ LOCAL_CFLAGS := $(libc_common_cflags) -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 ifeq ($(TARGET_ARCH),arm)
 # TODO: At some point, we need to remove this custom linker script.
 LOCAL_LDFLAGS := -Wl,-T,$(BUILD_SYSTEM)/armelf.xsc
+LOCAL_ARM_MODE := arm
 ifeq ($(WITH_TAINT_TRACKING),true)
   LOCAL_CFLAGS += -DWITH_TAINT_TRACKING
   LOCAL_CFLAGS += -g3
@@ -764,6 +768,7 @@ LOCAL_ALLOW_UNDEFINED_SYMBOLS := true
 # Don't install on release build
 LOCAL_MODULE_TAGS := eng debug
 
+LOCAL_ARM_MODE := arm
 include $(BUILD_SHARED_LIBRARY)
 
 
@@ -790,6 +795,7 @@ LOCAL_SYSTEM_SHARED_LIBRARIES :=
 # Don't install on release build
 LOCAL_MODULE_TAGS := eng debug
 
+LOCAL_ARM_MODE := arm
 include $(BUILD_SHARED_LIBRARY)
 
 endif	#!user
