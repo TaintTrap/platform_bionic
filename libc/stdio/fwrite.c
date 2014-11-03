@@ -69,7 +69,7 @@ fwrite(const void *buf, size_t size, size_t count, FILE *fp)
 
   if (xret > 0) {
       xtag = xbuf;
-      fprintf(stdout, "%s  : write(%d) taint tag: 0x%x\n", __func__, fd, xtag);
+      // fprintf(stdout, "%s  : write(%d) taint tag: 0x%x\n", __func__, fd, xtag);
   } else {
       if (errno == ENOATTR) {
           // fprintf(stdout, "fgetxattr(%s): no taint tag\n", result);
