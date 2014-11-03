@@ -1,11 +1,16 @@
 #define SIG_SETMASK        2    /* for setting the signal mask */
 
 #define UCONTEXT_MCONTEXT 20
-#define UCONTEXT_SIGMASK  (UCONTEXT_MCONTEXT +  84)
+#define UCONTEXT_SIGMASK  (UCONTEXT_MCONTEXT + 84)
+#define UCONTEXT_REGSPACE (UCONTEXT_SIGMASK  +  4 + 31*4)
+// note the +8 is to skip over the magic and size fields
+// within vfp_sigframe to get directly to vfp_sigframe.user_vfp.fpregs[32]
+#define UCONTEXT_FPREGS   (UCONTEXT_REGSPACE +  8)
 
 #define MCONTEXT_ARM_R0   (UCONTEXT_MCONTEXT +  3*4)
 #define MCONTEXT_ARM_SP   (MCONTEXT_ARM_R0   + 13*4)
 #define MCONTEXT_ARM_LR   (MCONTEXT_ARM_R0   + 14*4)
+#define MCONTEXT_ARM_CPSR (MCONTEXT_ARM_R0   + 16*4)
 
 /*
 struct ucontext {               // offset
