@@ -93,7 +93,6 @@ libc_common_src_files := \
 	stdio/fpurge.c \
 	stdio/fputc.c \
 	stdio/fputs.c \
-	stdio/fread.c \
 	stdio/freopen.c \
 	stdio/fscanf.c \
 	stdio/fseek.c \
@@ -341,17 +340,22 @@ libc_static_common_src_files := \
 # As mentioned above, some files must be compiled
 # with different C flags for static/dynamic lib.
 # We only only want WITH_TAINT_TRACKING for libc.so
+libc_taint_src_files = stdio/stdio.c \
+                       stdio/fopen.c \
+                       stdio/fwrite.c \
+                       stdio/fread.c \
+                       bionic/read.c \
+                       bionic/write.c
 ifeq ($(WITH_TAINT_TRACKING),true)
-  libc_static_common_src_files += stdio/stdio.c \
-                                  stdio/fopen.c \
-                                  stdio/fwrite.c
+  libc_static_common_src_files += $(libc_taint_src_files)
+else
+  libc_common_src_files += $(libc_taint_src_files)
 endif
 
 # Architecture specific source files go here
 # =========================================================
 ifeq ($(TARGET_ARCH),arm)
 libc_common_src_files += \
-	bionic/bionic_clone.c \
 	arch-arm/bionic/__get_pc.S \
 	arch-arm/bionic/__get_sp.S \
 	arch-arm/bionic/_exit_with_stack_teardown.S \
@@ -386,13 +390,20 @@ libc_common_src_files += \
 # can set breakpoints in them without messing
 # up any thumb code.
 libc_common_src_files += \
-	bionic/pthread-atfork.c.arm \
 	bionic/pthread-rwlocks.c.arm \
 	bionic/pthread-timers.c.arm \
 	bionic/ptrace.c.arm
 
 libc_static_common_src_files += \
         bionic/pthread.c.arm \
+
+ifeq ($(WITH_TAINT_TRACKING),true)
+  libc_static_common_src_files += bionic/pthread-atfork.c.arm \
+                                  bionic/bionic_clone.c
+else
+  libc_common_src_files += bionic/pthread-atfork.c.arm \
+                                  bionic/bionic_clone.c
+endif
 
 # these are used by the static and dynamic versions of the libc
 # respectively
@@ -473,6 +484,10 @@ ifeq ($(strip $(DEBUG_BIONIC_LIBC)),true)
 endif
 
 ifeq ($(TARGET_ARCH),arm)
+# ifeq ($(WITH_TAINT_TRACKING),true)
+#   libc_common_cflags += -DWITH_TAINT_TRACKING
+# endif
+  libc_common_cflags += -DDEBUG
   libc_common_cflags += -fstrict-aliasing
   libc_crt_target_cflags := -mthumb-interwork
   #
@@ -519,7 +534,7 @@ endif
 # Define some common includes
 # ========================================================
 libc_common_c_includes := \
-		dalvik/vm/anemu       \
+		bionic/anemu          \
 		$(LOCAL_PATH)/stdlib  \
 		$(LOCAL_PATH)/string  \
 		$(LOCAL_PATH)/stdio
@@ -633,6 +648,8 @@ LOCAL_CFLAGS := $(libc_common_cflags) \
 LOCAL_MODULE := libc_nomalloc
 LOCAL_WHOLE_STATIC_LIBRARIES := libc_common
 LOCAL_SYSTEM_SHARED_LIBRARIES :=
+LOCAL_WHOLE_STATIC_LIBRARIES += libanemu
+LOCAL_STATIC_LIBRARIES := libcutils libgccdemangle
 
 include $(BUILD_STATIC_LIBRARY)
 
@@ -672,13 +689,14 @@ include $(CLEAR_VARS)
 
 LOCAL_CFLAGS := $(libc_common_cflags) -DPTHREAD_DEBUG -DPTHREAD_DEBUG_ENABLED=0
 
-ifeq ($(WITH_TAINT_TRACKING),true)
-    LOCAL_CFLAGS += -DWITH_TAINT_TRACKING
-endif
-
 ifeq ($(TARGET_ARCH),arm)
 # TODO: At some point, we need to remove this custom linker script.
 LOCAL_LDFLAGS := -Wl,-T,$(BUILD_SYSTEM)/armelf.xsc
+ifeq ($(WITH_TAINT_TRACKING),true)
+  LOCAL_CFLAGS += -DWITH_TAINT_TRACKING
+  LOCAL_CFLAGS += -g3
+# LOCAL_CFLAGS += -O0
+endif
 endif
 
 LOCAL_C_INCLUDES := $(libc_common_c_includes)
