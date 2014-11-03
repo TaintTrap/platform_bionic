@@ -1,5 +1,7 @@
 LOCAL_PATH:= $(call my-dir)
 
+libm_common_cflags += -mfloat-abi=soft
+
 libm_common_src_files:= \
 	isinf.c  \
 	fpclassify.c \
@@ -188,6 +190,7 @@ LOCAL_SRC_FILES := \
 
 LOCAL_ARM_MODE := arm
 LOCAL_C_INCLUDES += $(libm_common_includes)
+LOCAL_CFLAGS += $(libm_common_cflags)
 
 LOCAL_MODULE:= libm
 
@@ -206,6 +209,7 @@ LOCAL_SRC_FILES := \
 LOCAL_ARM_MODE := arm
 
 LOCAL_C_INCLUDES += $(libm_common_includes)
+LOCAL_CFLAGS += $(libm_common_cflags)
 
 LOCAL_MODULE:= libm
 

@@ -458,6 +458,7 @@ endif # !arm
 # Define some common cflags
 # ========================================================
 libc_common_cflags := \
+    -mfloat-abi=soft 	\
 		-DWITH_ERRLIST			\
 		-DANDROID_CHANGES		\
 		-DUSE_LOCKS 			\
