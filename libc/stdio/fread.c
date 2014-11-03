@@ -154,7 +154,15 @@ fread(void *buf, size_t size, size_t count, FILE *fp)
 #endif
     {
         while (resid > (size_t)(r = fp->_r)) {
-            (void)memcpy((void *)p, (void *)fp->_p, (size_t)r);
+            memcpy(p, fp->_p, r);
+/*
+// optimized memcpy path
+#ifdef WITH_TAINT_TRACKING
+            emu_memcpy_safe(p, fp->_p, r);
+#else
+            memcpy(p, fp->_p, r);
+#endif
+*/
             fp->_p += r;
             /* fp->_r = 0 ... done in __srefill */
             p += r;
@@ -167,7 +175,15 @@ fread(void *buf, size_t size, size_t count, FILE *fp)
         }
     }
 
-    (void)memcpy((void *)p, (void *)fp->_p, resid);
+    memcpy(p, fp->_p, resid);
+/*
+// optimized memcpy path
+#ifdef WITH_TAINT_TRACKING
+            emu_memcpy_safe(p, fp->_p, r);
+#else
+            memcpy(p, fp->_p, r);
+#endif
+*/
     fp->_r -= resid;
     fp->_p += resid;
     FUNLOCKFILE(fp);
