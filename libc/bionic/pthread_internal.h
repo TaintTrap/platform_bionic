@@ -42,6 +42,12 @@ typedef struct pthread_internal_t
     int                         join_count;
     void*                       return_value;
     int                         intern;
+#ifdef WITH_TAINT_TRACKING
+    void*                       altstack;
+    size_t                      altstack_size; /* includes guard size */
+    size_t                      altstack_guard_size;
+    int                         target; /* emulation target */
+#endif
     __pthread_cleanup_t*        cleanup_stack;
     void**                      tls;         /* thread-local storage area */
 } pthread_internal_t;
