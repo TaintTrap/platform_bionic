@@ -97,7 +97,7 @@ __sclose(void *cookie)
   memset(result, 0, sizeof(result));
   readlink(path, result, sizeof(result)-1);
 
-  aprintf(stderr, "%s: close(%d) %s\n", __func__, fd, result);
+  lprintf(stderr, "%s: close(%d) %s\n", __func__, fd, result);
 #endif
 	return (close(fp->_file));
 }
